@@ -5,12 +5,12 @@
 #include <platform/platform_stdlib.h>
 #include <platform_opts.h>
 
+#include "lwip/netdb.h"
+
 #define MAX_RECV_SIZE 1500
 #define MAX_SEND_SIZE 256
 #define UDP_SERVER_PORT 5002
 #define TCP_SERVER_PORT 5003
-
-
 
 static int EXAMPLE_IPV6 = 0;
 
@@ -19,17 +19,17 @@ int start_client(uint32_t ipAddress, uint16_t port, uint8_t protMode) {
     int timeout;
     int _sock;
 
-    //create socket
+    // create socket
     if (protMode == 0) {  // TCP
         _sock = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     } else {
         _sock = lwip_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
     if (_sock < 0) {
-        printf("\n\r[ERROR] Create socket failed\n");
+        printf("\n\r[%s] [ERROR] Create socket failed\n", __FUNCTION__);
         return -1;
     }
-    printf("\n\r[INFO] Create socket successfully\n");
+    printf("\n\r[%s] [INFO] Create socket successfully\n", __FUNCTION__);
 
     // initialize structure dest
     struct sockaddr_in serv_addr;
@@ -38,24 +38,30 @@ int start_client(uint32_t ipAddress, uint16_t port, uint8_t protMode) {
     serv_addr.sin_addr.s_addr = ipAddress;
     serv_addr.sin_port = htons(port);
 
-    //Connecting to server
-    if (protMode == 0) {  //TCP MODE
-        if (connect(_sock, ((struct sockaddr *)&serv_addr), sizeof(serv_addr)) == 0) {
-            printf("\r\n[INFO] Connect to Server successfully!\r\n");
+    // Connecting to server
+    if (protMode == 0) {  // TCP MODE
+        if (connect(_sock, ((struct sockaddr *)&serv_addr),
+                    sizeof(serv_addr)) == 0) {
+            printf("\r\n[%s] [INFO] Connect to Server successfully!\r\n",
+                   __FUNCTION__);
             timeout = 3000;
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                            sizeof(timeout));
             timeout = 30000;
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-            lwip_setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+                            sizeof(timeout));
+            lwip_setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY, &enable,
+                            sizeof(enable));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_KEEPALIVE, &enable,
+                            sizeof(enable));
             return _sock;
         } else {
-            printf("\n\r[ERROR] Connect to server failed\n");
+            printf("\n\r[%s] [ERROR] Connect to server failed\n", __FUNCTION__);
             close_socket(_sock);
             return -1;
         }
     } else {
-        //printf("\r\nUdp client setup Server's information successful!\r\n");
+        // printf("\r\nUdp client setup Server's information successful!\r\n");
     }
     return _sock;
 }
@@ -65,7 +71,7 @@ int start_clientv6(uint32_t *ipv6Address, uint16_t port, uint8_t protMode) {
     int timeout;
     int _sock;
 
-    //create socket
+    // create socket
     if (protMode == 0) {  // TCP
         _sock = lwip_socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
     } else {
@@ -82,26 +88,32 @@ int start_clientv6(uint32_t *ipv6Address, uint16_t port, uint8_t protMode) {
     memset(&serv_addr6, 0, sizeof(serv_addr6));
     serv_addr6.sin6_family = AF_INET6;
     serv_addr6.sin6_port = htons(port);
-    //inet_pton(AF_INET6, TCP_SERVER_IP_TEST, &(serv_addr6.sin6_addr));
+    // inet_pton(AF_INET6, TCP_SERVER_IP_TEST, &(serv_addr6.sin6_addr));
     for (int xxx = 0; xxx < 4; xxx++) {  // IPv6 address
         serv_addr6.sin6_addr.un.u32_addr[xxx] = ipv6Address[xxx];
     }
 
     // connection starts
-    if (protMode == 0) {  //TCP MODE
-        if (connect(_sock, (struct sockaddr *)(&serv_addr6), sizeof(serv_addr6)) == -1) {
+    if (protMode == 0) {  // TCP MODE
+        if (connect(_sock, (struct sockaddr *)(&serv_addr6),
+                    sizeof(serv_addr6)) == -1) {
             printf("\n\r[ERROR] Connect to server failed\n");
         }
         printf("[INFO] Connect to server successfully\n");
 
-        if (connect(_sock, (struct sockaddr *)(&serv_addr6), sizeof(serv_addr6)) == 0) {
+        if (connect(_sock, (struct sockaddr *)(&serv_addr6),
+                    sizeof(serv_addr6)) == 0) {
             printf("\r\n[INFO] Connect to Server successfully!\r\n");
             timeout = 3000;
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                            sizeof(timeout));
             timeout = 30000;
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-            lwip_setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+                            sizeof(timeout));
+            lwip_setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY, &enable,
+                            sizeof(enable));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_KEEPALIVE, &enable,
+                            sizeof(enable));
             return _sock;
         } else {
             printf("\r\n[ERROR] Connect to Server failed!\r\n");
@@ -109,7 +121,7 @@ int start_clientv6(uint32_t *ipv6Address, uint16_t port, uint8_t protMode) {
             return -1;
         }
     } else {
-        //printf("\r\nUdp client setup Server's information successful!\r\n");
+        // printf("\r\nUdp client setup Server's information successful!\r\n");
     }
 
     return _sock;
@@ -145,15 +157,20 @@ int start_client_v6(char ipv6Address[], uint16_t port, uint8_t protMode) {
     // }
 
     // Connecting to server
-    if (protMode == 0) {  //TCP MODE
-        if (connect(_sock, ((struct sockaddr *)&ser_addr), sizeof(ser_addr)) == 0) {
+    if (protMode == 0) {  // TCP MODE
+        if (connect(_sock, ((struct sockaddr *)&ser_addr), sizeof(ser_addr)) ==
+            0) {
             printf("\n\r[INFO] Connect to server successfully\n");
             timeout = 3000;
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                            sizeof(timeout));
             timeout = 30000;
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-            lwip_setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
-            lwip_setsockopt(_sock, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+                            sizeof(timeout));
+            lwip_setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY, &enable,
+                            sizeof(enable));
+            lwip_setsockopt(_sock, SOL_SOCKET, SO_KEEPALIVE, &enable,
+                            sizeof(enable));
             return _sock;
         } else {
             printf("\n\r[ERROR] Connect to server failed\n");
@@ -172,7 +189,7 @@ int start_server(uint16_t port, uint8_t protMode) {
     int _sock;
     int timeout;
 
-    //create socket
+    // create socket
     if (protMode == 0) {
         timeout = 3000;
         _sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -203,8 +220,7 @@ int start_server(uint16_t port, uint8_t protMode) {
         printf("\r\nERROR on binding\r\n");
         return -1;
     }
-    //lwip_fcntl(_sock, F_SETFL, O_NONBLOCK);
-	
+
     return _sock;
 }
 
@@ -212,16 +228,17 @@ int start_server_v6(uint16_t port, uint8_t protMode) {
     int _sock;
     int timeout;
 
-    //create socket
+    // create socket
     if (protMode == 0) {  // TCP
         timeout = 3000;
         _sock = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
         setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
         printf("\n\r[INFO] Create TCP socket successfudlly\n");
     } else {  // UDP
-        //timeout = 1000;
+        // timeout = 1000;
         _sock = socket(AF_INET6, SOCK_DGRAM, IPPROTO_UDP);
-        //setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        // setsockopt(_sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+        // sizeof(timeout));
         printf("\n\r[INFO] Create UDP socket successfully\n");
     }
 
@@ -243,9 +260,8 @@ int start_server_v6(uint16_t port, uint8_t protMode) {
         closesocket(_sock);
         return -1;
     }
-    //lwip_fcntl(_sock, F_SETFL, O_NONBLOCK);
     printf("\n\r[INFO] Bind socket successfully\n");
-   
+
     return _sock;
 }
 
@@ -257,12 +273,11 @@ int get_sock_errno(int sock) {
 }
 
 int set_sock_recv_timeout(int sock, int timeout) {
-    return lwip_setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    return lwip_setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                           sizeof(timeout));
 }
 
-void close_socket(int sock) {
-    lwip_close(sock);
-}
+void close_socket(int sock) { lwip_close(sock); }
 
 int enable_ipv6(void) {
     EXAMPLE_IPV6 = 1;
@@ -274,7 +289,9 @@ int get_ipv6_status(void) {
     // return current ipv6 enabled status
     return EXAMPLE_IPV6;
 }
+
 // TCP
+
 int sock_listen(int sock, int max) {
     if (listen(sock, max) < 0) {
         // printf("\r\nERROR on listening\r\n");
@@ -310,13 +327,20 @@ int get_available(int sock) {
         return -1;
     } else {
         timeout = 3000;
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                        sizeof(timeout));
         timeout = 30000;
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+                        sizeof(timeout));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_REUSEADDR, &enable,
+                        sizeof(enable));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_KEEPALIVE, &enable,
+                        sizeof(enable));
         printf("\n\r[INFO] Accept connection successfully\n");
-        printf("\r\nA client connected to this server :\r\n[PORT]: %d\r\n[IP]:%s\r\n\r\n", ntohs(cli_addr.sin_port), inet_ntoa(cli_addr.sin_addr.s_addr));
+        printf(
+            "\r\nA client connected to this server :\r\n[PORT]: "
+            "%d\r\n[IP]:%s\r\n\r\n",
+            ntohs(cli_addr.sin_port), inet_ntoa(cli_addr.sin_addr.s_addr));
         return client_fd;
     }
 }
@@ -347,13 +371,19 @@ int get_available_v6(int sock) {
         return -1;
     } else {
         timeout = 3000;
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                        sizeof(timeout));
         timeout = 30000;
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
-        lwip_setsockopt(client_fd, SOL_SOCKET, SO_KEEPALIVE, &enable, sizeof(enable));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+                        sizeof(timeout));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_REUSEADDR, &enable,
+                        sizeof(enable));
+        lwip_setsockopt(client_fd, SOL_SOCKET, SO_KEEPALIVE, &enable,
+                        sizeof(enable));
         printf("\r\n[INFO] Accept connection successfully\n");
-        //printf("\r\n[INFO] A client connected to this server :\r\n[PORT]: %d\r\n[IPv6]:%s\r\n\r\n", ntohl(cli_addr.sin6_port), inet6_ntoa(cli_addr.sin6_addr.un.u32_addr[4]));
+        // printf("\r\n[INFO] A client connected to this server :\r\n[PORT]:
+        // %d\r\n[IPv6]:%s\r\n\r\n", ntohl(cli_addr.sin6_port),
+        // inet6_ntoa(cli_addr.sin6_addr.un.u32_addr[4]));
         return client_fd;
     }
 }
@@ -368,15 +398,16 @@ int recv_data(int sock, const uint8_t *data, uint16_t len, int flag) {
 
 int send_data(int sock, const uint8_t *data, uint16_t len, int flag) {
     int ret;
-    //printf("[info] ard_socket.c send_data()\r\n");
+    // printf("[info] ard_socket.c send_data()\r\n");
     ret = lwip_send(sock, data, len, flag);
-
+    printf("[info] send_data() ewt: %d\r\n", ret);
     return ret;
 }
 
 // UDP
 
-int sendto_data(int sock, const uint8_t *data, uint16_t len, uint32_t peer_ip, uint16_t peer_port) {
+int sendto_data(int sock, const uint8_t *data, uint16_t len, uint32_t peer_ip,
+                uint16_t peer_port) {
     int ret;
     struct sockaddr_in peer_addr;
 
@@ -385,29 +416,33 @@ int sendto_data(int sock, const uint8_t *data, uint16_t len, uint32_t peer_ip, u
     peer_addr.sin_addr.s_addr = peer_ip;
     peer_addr.sin_port = htons(peer_port);
 
-    ret = lwip_sendto(sock, data, len, 0, ((struct sockaddr *)&peer_addr), sizeof(struct sockaddr_in));
+    ret = lwip_sendto(sock, data, len, 0, ((struct sockaddr *)&peer_addr),
+                      sizeof(struct sockaddr_in));
 
     return ret;
 }
 
-int sendto_data_v6(int sock, const void *send_data, size_t len, uint32_t peer_ip, uint16_t peer_port) {
+int sendto_data_v6(int sock, const void *send_data, size_t len,
+                   uint32_t peer_ip, uint16_t peer_port) {
     int ret = 0;
     struct sockaddr_in6 peer_addr;
 
-	peer_ip = peer_ip;
-	peer_port = peer_port;
+    peer_ip = peer_ip;
+    peer_port = peer_port;
 
     memset(&peer_addr, 0, sizeof(peer_addr));
     peer_addr.sin6_family = AF_INET6;
     peer_addr.sin6_port = htons(UDP_SERVER_PORT);
-	inet_pton(AF_INET6, (char*)peer_ip, &(peer_addr.sin6_addr));
+    inet_pton(AF_INET6, (char *)peer_ip, &(peer_addr.sin6_addr));
 
-    ret = lwip_sendto(sock, send_data, len, 0, ((struct sockaddr *)&peer_addr), sizeof(peer_addr));
+    ret = lwip_sendto(sock, send_data, len, 0, ((struct sockaddr *)&peer_addr),
+                      sizeof(peer_addr));
 
     return ret;
 }
 
-int get_receive(int sock, uint8_t *data, int length, int flag, uint32_t *peer_addr, uint16_t *peer_port) {
+int get_receive(int sock, uint8_t *data, int length, int flag,
+                uint32_t *peer_addr, uint16_t *peer_port) {
     int ret = 0;
     struct sockaddr from;
     socklen_t fromlen;
@@ -417,11 +452,14 @@ int get_receive(int sock, uint8_t *data, int length, int flag, uint32_t *peer_ad
     socklen_t len;
 
     if (flag & 0x01) {
-        // for MSG_PEEK, we try to peek packets by changing receiving timeout to 10ms
-        ret = lwip_getsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &backup_recv_timeout, &len);
+        // for MSG_PEEK, we try to peek packets by changing receiving timeout to
+        // 10ms
+        ret = lwip_getsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
+                              &backup_recv_timeout, &len);
         if (ret >= 0) {
             recv_timeout = 10;
-            ret = lwip_setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &recv_timeout, sizeof(recv_timeout));
+            ret = lwip_setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &recv_timeout,
+                                  sizeof(recv_timeout));
             if (ret >= 0) {
                 backup_recvtimeout = 1;
             }
@@ -440,25 +478,27 @@ int get_receive(int sock, uint8_t *data, int length, int flag, uint32_t *peer_ad
 
     if ((flag & 0x01) && (backup_recvtimeout == 1)) {
         // restore receiving timeout
-        lwip_setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &backup_recv_timeout, sizeof(recv_timeout));
+        lwip_setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &backup_recv_timeout,
+                        sizeof(recv_timeout));
     }
 
     return ret;
 }
 
-int get_receive_v6(int sock, void *recv_data, int len, int flags, uint32_t *peer_ip, uint16_t *peer_port) {
+int get_receive_v6(int sock, void *recv_data, int len, int flags,
+                   uint32_t *peer_ip, uint16_t *peer_port) {
     int ret = 0;
     struct sockaddr_in6 peer_addr;
     unsigned int peer_len = sizeof(struct sockaddr_in6);
 
-	peer_ip = peer_ip;
-	peer_port = peer_port;
+    peer_ip = peer_ip;
+    peer_port = peer_port;
 
-    ret = lwip_recvfrom(sock, recv_data, len, flags, ((struct sockaddr *)&peer_addr), &peer_len);
-    //printf("get_rec_v6 lwip_recvfrom: %d\r\n", ret);
+    ret = lwip_recvfrom(sock, recv_data, len, flags,
+                        ((struct sockaddr *)&peer_addr), &peer_len);
+    // printf("get_rec_v6 lwip_recvfrom: %d\r\n", ret);
     return ret;
 }
-
 
 void ipv6_udp_server(void) {
     int server_fd;
@@ -469,17 +509,20 @@ void ipv6_udp_server(void) {
     char send_data[MAX_SEND_SIZE] = "Hi client!";
     char recv_data[MAX_RECV_SIZE];
 
-    //create socket
+    // create socket
 
     server_fd = start_server_v6(UDP_SERVER_PORT, 1);
 
     while (1) {
         memset(recv_data, 0, MAX_RECV_SIZE);
-        // if (get_receive_v6(server_fd, recv_data, MAX_SEND_SIZE, 0, UDP_SERVER_IP, UDP_SERVER_PORT) <= 0) {
-        if (lwip_recvfrom(server_fd, recv_data, MAX_RECV_SIZE, 0, (struct sockaddr *)&client_addr, &addrlen) > 0) {
+        // if (get_receive_v6(server_fd, recv_data, MAX_SEND_SIZE, 0,
+        // UDP_SERVER_IP, UDP_SERVER_PORT) <= 0) {
+        if (lwip_recvfrom(server_fd, recv_data, MAX_RECV_SIZE, 0,
+                          (struct sockaddr *)&client_addr, &addrlen) > 0) {
             printf("\n\r[INFO] Receive data : %s\n", recv_data);
-            //Send Response
-            if (lwip_sendto(server_fd, send_data, MAX_SEND_SIZE, 0, (struct sockaddr *)&client_addr, addrlen) == -1) {
+            // Send Response
+            if (lwip_sendto(server_fd, send_data, MAX_SEND_SIZE, 0,
+                            (struct sockaddr *)&client_addr, addrlen) == -1) {
                 printf("\n\r[ERROR] Send data failed\n");
             } else {
                 printf("\n\r[INFO] Send data successfully\n");
@@ -492,3 +535,80 @@ void ipv6_udp_server(void) {
     return;
 }
 
+// OTA
+// OTA TCP bind() process
+int ota_bind_socket(int server_socket, int OTAport) {
+    struct sockaddr_in server_addr;
+
+    // create socket
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket < 0) {
+        printf("\n[Error] Can not create socket\n");
+        return -1;
+    }
+    // initilize structure dest
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(OTAport);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+
+    // Assigna port number to the socket
+    if (bind(server_socket, (struct sockaddr *)&server_addr,
+             sizeof(server_addr)) == -1) {
+        printf("\n[Error] Socket connect failed\n");
+        closesocket(server_socket);
+        return -1;
+    }
+    ota_listen_socket(server_socket, OTAport);
+
+    return server_socket;
+}
+
+// OTA listen() for incoming TCP socket sent by OTA Server
+void ota_listen_socket(int server_socket, int OTAport){
+    listen(server_socket, 10);
+    printf("<Arduino>\r\nListening on port %d.\n", OTAport);
+}
+
+// OTA accept() TCP socket and return incoming Port and IP Address
+int ota_accept_socket(int server_socket){
+    int enable = 1;
+    int timeout;
+    int client_socket;
+    int err;
+    struct sockaddr_in cli_addr;
+
+    socklen_t client = sizeof(cli_addr);
+
+    do {
+        client_socket = lwip_accept(server_socket, ((struct sockaddr *)&cli_addr), &client);
+        if (client_socket < 0) {
+            err = get_sock_errno(server_socket);
+            if (err != EAGAIN) {
+                break;
+            }
+        }
+    } while (client_socket < 0);
+
+    if (client_socket < 0) {
+        printf("\n[%s] [ERROR] Accept connection failed\n", __FUNCTION__);
+        return -1;
+    } else {
+        timeout = 3000;
+        lwip_setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                        sizeof(timeout));
+        timeout = 30000;
+        lwip_setsockopt(client_socket, SOL_SOCKET, SO_SNDTIMEO, &timeout,
+                        sizeof(timeout));
+        lwip_setsockopt(client_socket, SOL_SOCKET, SO_REUSEADDR, &enable,
+                        sizeof(enable));
+        lwip_setsockopt(client_socket, SOL_SOCKET, SO_KEEPALIVE, &enable,
+                        sizeof(enable));
+        printf("[%s] [INFO] Accept connection successfully\n", __FUNCTION__);
+        printf(
+            "\r\nOTA server connected to this client :\r\n[PORT]: "
+            "%d\r\n[IP]:%s\r\n\r\n",
+            ntohs(cli_addr.sin_port), inet_ntoa(cli_addr.sin_addr.s_addr));
+        return client_socket;
+    }
+}
