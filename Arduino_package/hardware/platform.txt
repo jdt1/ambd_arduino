@@ -151,24 +151,4 @@ tools.ameba_d_tools.upload.pattern.linux="{runtime.tools.ameba_d_tools.path}/upl
 tools.ameba_d_tools.upload.pattern.macosx="{runtime.tools.ameba_d_tools.path}/upload_image_tool_macos" "{runtime.tools.ameba_d_tools.path}" "{serial.port}" "{board}" "{build.auto_upload_mode}" "{build.erase_flash}" "1500000" {upload.verbose}
 
 #tools.ameba_d_tools.upload.network_pattern="{runtime.tools.ameba_d_tools.path}/upload_ota.exe" -i "{serial.port}" -p "{network.port}" -f "{runtime.tools.ameba_d_tools.path}\ota.bin"
-#tools.ameba_d_tools.upload.network_pattern.windows="{runtime.tools.ameba_d_tools.path}/upload_ota.exe" -i "{serial.port}" -p "{network.port}" -f "{runtime.tools.ameba_d_tools.path}\ota.bin"
-
-# Debugger configuration (general options)
-# ----------------------------------------
-tools.gdb.path={runtime.tools.ameba_d_asdk_toolchain.path}/bin/
-tools.gdb.cmd=arm-none-eabi-gdb
-tools.gdb.cmd.windows=arm-none-eabi-gdb.exe
-tools.gdb.debug.pattern="{path}/{cmd}" --interpreter=mi2 -ex "set pagination off" --baud 115200 -ex "set target-charset ASCII" -ex "target remote {debug.port}" {build.path}/application.axf
-
-debug.executable={build.path}/application.axf
-debug.toolchain=gcc
-debug.toolchain.path={runtime.tools.ameba_d_asdk_toolchain.path}/bin/
-debug.toolchain.prefix=arm-none-eabi-
-
-# Options for JLink GDB server
-# ----------------------------------------
-debug.server=jlink
-debug.server.jlink.path.windows=C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe
-#debug.server.jlink.device=CORTEX-M33
-#debug.server.jlink.interface=swd
-#debug.server.jlink.script={runtime.tools.ameba_d_tools.path}/tools/debug/RTL8722_Arduino_debug.JLinkScript
+tools.ameba_d_tools.upload.network_pattern.windows="{runtime.tools.ameba_d_tools.path}/DownloadServer.exe" "8082" "%UserProfile%\Desktop\OTA_All.bin" "{serial.port}"
