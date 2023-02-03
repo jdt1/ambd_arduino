@@ -75,6 +75,7 @@ class SoftwareSerial : public Stream
         friend void handle_interrupt(uint32_t id, uint32_t event);
 
         void (*availableCallback)(char c);
+        void (*txCpltCallback)();
 
     public:
         // public methods
@@ -96,6 +97,9 @@ class SoftwareSerial : public Stream
 
         int peek();
         virtual size_t write(uint8_t byte);
+
+        size_t write_nonblocking(uint8_t *b, uint8_t len);
+
         virtual int read();
         virtual int available();
         virtual void flush();
@@ -107,8 +111,10 @@ class SoftwareSerial : public Stream
     public:
         void setBufferSize(uint32_t buffer_size);
         void setAvailableCallback(void (*callback)(char c));
+        void setTxCpltCallback(void (*callback)(void));
         void begin(long speed, int data_bits, int parity, int stop_bits);
         void begin(long speed, int data_bits, int parity, int stop_bits, int flowctrl, int rtsPin, int ctsPin);
+
 };
 
 #endif
